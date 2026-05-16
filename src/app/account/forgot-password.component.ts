@@ -8,6 +8,7 @@ export class ForgotPasswordComponent implements OnInit {
     form!: FormGroup;
     loading = false;
     submitted = false;
+    emailSent = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -21,16 +22,12 @@ export class ForgotPasswordComponent implements OnInit {
         });
     }
 
-    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
-
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -40,8 +37,16 @@ export class ForgotPasswordComponent implements OnInit {
             .pipe(first())
             .pipe(finalize(() => this.loading = false))
             .subscribe({
-                next: () => this.alertService.success('Please check your email for password reset instructions'),
-                error: error => this.alertService.error(error)
+                next: () => {
+                    this.emailSent = true;
+                    this.alertService.success('If that email exists in our system, a reset link has been sent. Check your inbox and spam folder.');
+                },
+                error: error => {
+                    // Show success anyway to prevent email enumeration attacks
+                    this.emailSent = true;
+                    this.alertService.success('If that email exists in our system, a reset link has been sent. Check your inbox and spam folder.');
+                    console.error('Forgot password error:', error);
+                }
             });
     }
 }
