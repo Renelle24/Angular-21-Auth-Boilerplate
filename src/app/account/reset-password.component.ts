@@ -36,16 +36,20 @@ export class ResetPasswordComponent implements OnInit {
             validator: MustMatch('password', 'confirmPassword')
         });
 
-        const token = this.route.snapshot.queryParams['token'];
+        // save token from URL before doing anything
+        this.token = this.route.snapshot.queryParams['token'];
 
-        this.accountService.validateResetToken(token)
+        if (!this.token) {
+            this.tokenStatus = TokenStatus.Invalid;
+            return;
+        }
+
+        this.accountService.validateResetToken(this.token)
             .pipe(first())
             .subscribe({
                 next: () => {
-                    this.token = token;
+                    // token is valid - show the reset form
                     this.tokenStatus = TokenStatus.Valid;
-                    // remove token from url AFTER validation succeeds
-                    this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
                 },
                 error: () => {
                     this.tokenStatus = TokenStatus.Invalid;
