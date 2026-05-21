@@ -11,7 +11,6 @@ import { AppComponent } from './app.component';
 import { AlertComponent } from './_components';
 import { HomeComponent } from './home';
 
-// used to create fake backend
 import { fakeBackendProvider } from './_helpers';
 import { environment } from '@environments/environment';
 
@@ -22,22 +21,17 @@ import { environment } from '@environments/environment';
     HttpClientModule,
     AppRoutingModule
   ],
-
   declarations: [
     AppComponent,
     AlertComponent,
     HomeComponent
   ],
-
   providers: [
     { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-
-    // only use fake backend in development
     ...(environment.production ? [] : [fakeBackendProvider])
   ],
-
   bootstrap: [AppComponent]
 })
 export class AppModule { }
