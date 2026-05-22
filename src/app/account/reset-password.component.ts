@@ -15,7 +15,7 @@ enum TokenStatus {
 export class ResetPasswordComponent implements OnInit {
     TokenStatus = TokenStatus;
     tokenStatus = TokenStatus.Validating;
-    token?: string;
+    token!: string;
     form!: FormGroup;
     loading = false;
     submitted = false;
@@ -36,19 +36,20 @@ export class ResetPasswordComponent implements OnInit {
             validator: MustMatch('password', 'confirmPassword')
         });
 
-        // save token from URL before doing anything
-        this.token = this.route.snapshot.queryParams['token'];
+        // get token from url
+        const token = this.route.snapshot.queryParamMap.get('token');
 
-        if (!this.token) {
+        if (!token) {
             this.tokenStatus = TokenStatus.Invalid;
             return;
         }
 
-        this.accountService.validateResetToken(this.token)
+        this.token = token;
+
+        this.accountService.validateResetToken(token)
             .pipe(first())
             .subscribe({
                 next: () => {
-                    // token is valid - show the reset form
                     this.tokenStatus = TokenStatus.Valid;
                 },
                 error: () => {
@@ -68,7 +69,7 @@ export class ResetPasswordComponent implements OnInit {
         }
 
         this.loading = true;
-        this.accountService.resetPassword(this.token!, this.f['password'].value, this.f['confirmPassword'].value)
+        this.accountService.resetPassword(this.token, this.f['password'].value, this.f['confirmPassword'].value)
             .pipe(first())
             .subscribe({
                 next: () => {
